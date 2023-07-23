@@ -19,7 +19,7 @@ function compareTwo(a: any, b: any): boolean {
 }
 
 function compare(a: any[] | null, b: any[] | null) {
-  if(!a || !b) return false;
+  if (!a || !b) return false;
   // unequal lengths, return false early
   if (a.length !== b.length) return false;
   // check values
