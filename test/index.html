@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test</title>
+	<script type="importmap">
+		{
+			"imports": {
+				"@imhtml/imhtml": "./mod.ts"
+			}
+		}
+	</script>
+</head>
+<body>
+	<script type="module">
+		import ImHtml from "@imhtml/imhtml";
+		class Component extends ImHtml {
+			count = 0
+			id= Math.random()
+			render() {
+				console.log("rendering", this.id)
+				return this.template`
+				<div style="height:125vh;">
+					<h1>Hello World</h1>
+					<p>Count: ${this.count}</p>
+					${this.html`<div>nested: ${this.count}</div>`}
+					<button onclick=${() => this.count++}>Click Me</button>
+					<div> dimensions: x=${window.innerWidth} y=${window.innerHeight}</div>
+				</div>
+				`;
+			}
+		}
+		customElements.define("my-component", Component);
+	</script>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+	<my-component></my-component>
+</body>
+</html>

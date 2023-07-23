@@ -1,0 +1,6 @@
+{
+	"tasks": {
+		"test": "deno run -A --watch ./test/server.ts"
+	},
+	"lock": false
+}
