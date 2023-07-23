@@ -1,5 +1,5 @@
-# Deno Library Template
+# ImHtml
 
-This is a template for a basic Deno library with support for publishing to NPM via [dnt](https://github.com/denoland/dnt).
+This is the web component aspect of the experimental ImHtml project bringing immediate mode UI rendering to the web.
 
-Make sure to update the package info in `build.ts` and author name in `LICENCE`.
+This is very early WIP and should not be used for production unless you are very brave.
