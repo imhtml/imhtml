@@ -1,5 +1,12 @@
 import { deepEqual, html as uhtml, render } from "./deps.ts";
 
+declare global {
+  var __imhtml: {
+    components: Set<ImHtml>,
+  };
+}
+
+
 function compareTwo(a: any, b: any): boolean {
   // check if both are functions -> if so, we don't care (prevents inline functions from causing renders)
   if (typeof a === "function" && typeof b === "function") return true;
@@ -32,21 +39,61 @@ function compare(a: any[] | null, b: any[] | null) {
   return true;
 }
 
+function createOrRegisterFrameLoop(comp: ImHtml){
+  // frame loop established, just add to components
+  if(globalThis.__imhtml){
+    globalThis.__imhtml.components.add(comp)
+    return
+  }
+  globalThis.__imhtml = {
+    components: new Set<ImHtml>(),
+  }
+  globalThis.__imhtml.components.add(comp)
+  function update(){
+    for(const component of globalThis.__imhtml.components){
+      if(!component.IMHTML_IS_VISIBLE) continue;
+      const result: { strings: string[], values: any[] } = component.render()
+      if(!compare(component.IMHTML_PREV_VALUES, result.values)){
+        component.update(result.strings, result.values)
+      }
+      component.IMHTML_PREV_VALUES = result.values
+    }
+    requestAnimationFrame(update)
+  }
+  update()
+}
+
 export default abstract class ImHtml extends HTMLElement {
-  // Values returned from this.html
-  #previousRenderValues: any[] | null = null;
-  // Whether or not the component is visible
-  #isVisible = true;
+  IMHTML_IS_VISIBLE = true;
+  IMHTML_PREV_VALUES: any[] = []
   // Intersection observer
   #__intersectionObserver: IntersectionObserver | null = null;
 
-  abstract render(): any;
+  abstract render(): { strings: string[], values: any[] };
 
-  protected html = uhtml;
+  protected template = (strings: TemplateStringsArray, ...values: any[]) => ({
+    strings,
+    values,
+  })
+
+  protected html = uhtml
 
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+  }
+
+  update(template?: string[], values?: any[]){
+    // if update is being called from the frame loop, we don't need to do anything
+    // or else we will call render() to get the template and values
+    if(!template || !values){
+      const result = this.render()
+      template = result.strings
+      values = result.values
+    }
+    console.log("Calling update")
+    // @ts-ignore typescript is dumb
+    render(this.shadowRoot!, uhtml(template, ...values))
   }
 
   // declare lifecycle methods and events
@@ -62,6 +109,7 @@ export default abstract class ImHtml extends HTMLElement {
       this.#__mountCallbacks.delete(callback);
     };
   };
+
   protected onUnmount = (callback: () => void) => {
     this.#__unmountCallbacks.add(callback);
     return () => {
@@ -70,29 +118,23 @@ export default abstract class ImHtml extends HTMLElement {
   };
 
   connectedCallback() {
-    // create update function and start frameloop
-    const update = () => {
-      // check if visible
-      if (!this.#isVisible) return requestAnimationFrame(update);
-      // call render function to diff
-      this.render();
-      requestAnimationFrame(update);
-    };
-    // start frameloop
-    requestAnimationFrame(update);
     // call mount functions
     this.#__mountCallbacks.forEach((callback) => callback());
     // call mount method
     this.mount?.();
+
+    // create or register frame loop
+    createOrRegisterFrameLoop(this)
+
     // add intersection observer to shadow root
     setTimeout(() => {
       if (this.shadowRoot?.host) {
         this.#__intersectionObserver = new IntersectionObserver((entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              this.#isVisible = true;
+              this.IMHTML_IS_VISIBLE = true;
             } else {
-              this.#isVisible = false;
+              this.IMHTML_IS_VISIBLE = false;
             }
           });
         }, {
@@ -102,19 +144,11 @@ export default abstract class ImHtml extends HTMLElement {
       }
     }, 100);
   }
+
   disconnectedCallback() {
     this.#__unmountCallbacks.forEach((callback) => callback());
     this.unmount?.();
     this.#__intersectionObserver?.disconnect();
+    globalThis.__imhtml.components.delete(this)
   }
-
-  protected template = (
-    strings: TemplateStringsArray,
-    ...values: unknown[]
-  ) => {
-    if (!compare(this.#previousRenderValues, values)) {
-      this.#previousRenderValues = values;
-      render(this.shadowRoot!, uhtml(strings, ...values));
-    }
-  };
 }
