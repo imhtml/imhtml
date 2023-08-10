@@ -12,16 +12,15 @@
 </head>
 <body>
 	<script type="module">
-		import ImHtml from "@imhtml/imhtml";
+		import ImHtml, {t, h} from "@imhtml/imhtml";
 		class Component extends ImHtml {
 			count = 0
-			id = Math.random() * 100
 			render() {
-				return this.template`
+				return t`
 				<div>
 					<h1>Hello World</h1>
 					<p>Count: ${this.count}</p>
-					${(this.count >= 5 && this.count < 10) ? this.html`<my-component></my-component>` : this.html`<p>Count is less than 5</p>`}
+					${(this.count >= 5 && this.count < 10) ? h`<my-component></my-component>` : h`<p>Count is less than 5</p>`}
 					<button onclick=${() => {this.count++}}>Click Me</button>
 					<div> dimensions: x=${window.innerWidth} y=${window.innerHeight}</div>
 				</div>

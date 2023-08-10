@@ -1,12 +1,16 @@
 import { deepEqual, html as uhtml, render } from "./deps.ts";
 
+/* Declare global __imhtml object
+ */
 declare global {
   var __imhtml: {
     components: Set<ImHtml>,
   };
 }
 
-
+/* Compare two values. This doesn't compare functions as functions declared inside of the markup
+will always be unequal. This will always be true for all non-primitives, so we deep compare objects. 
+Return a boolean, true if equal and false if not */
 function compareTwo(a: any, b: any): boolean {
   // check if both are functions -> if so, we don't care (prevents inline functions from causing renders)
   if (typeof a === "function" && typeof b === "function") return true;
@@ -25,6 +29,8 @@ function compareTwo(a: any, b: any): boolean {
   return true;
 }
 
+/* Compare two arrays using compareTwo. 
+Returns a boolean, true if arrays are equal and false if not. */
 function compare(a: any[] | null, b: any[] | null) {
   if (!a || !b) return false;
   // unequal lengths, return false early
@@ -39,16 +45,22 @@ function compare(a: any[] | null, b: any[] | null) {
   return true;
 }
 
+/* Components call this when mounting to add the component to the shared update loop, and create it if it doesn't exist.
+Not sure if I need to worry about maintaining the frameloop if the calling component is GC'ed. Could also use a weakmap instead of a set.
+Not sure the implications of that. */
 function createOrRegisterFrameLoop(comp: ImHtml){
   // frame loop established, just add to components
   if(globalThis.__imhtml){
     globalThis.__imhtml.components.add(comp)
     return
   }
+
   globalThis.__imhtml = {
     components: new Set<ImHtml>(),
   }
+
   globalThis.__imhtml.components.add(comp)
+
   function update(){
     for(const component of globalThis.__imhtml.components){
       if(!component.IMHTML_IS_VISIBLE) continue;
@@ -60,28 +72,37 @@ function createOrRegisterFrameLoop(comp: ImHtml){
     }
     requestAnimationFrame(update)
   }
+
   update()
 }
+
+/* Template tag function. Returns an object with the strings and values. Optionally, I could just return values. */
+export function t(strings: TemplateStringsArray, ...values: any[]) {
+  return { strings, values };
+}
+
+/* Re-export template fn */
+export const h = uhtml
 
 export default abstract class ImHtml extends HTMLElement {
   IMHTML_IS_VISIBLE = true;
   IMHTML_PREV_VALUES: any[] = []
+
   // Intersection observer
   #__intersectionObserver: IntersectionObserver | null = null;
 
-  abstract render(): { strings: string[], values: any[] };
+  protected template = t;
+  protected t = t;
 
-  protected template = (strings: TemplateStringsArray, ...values: any[]) => ({
-    strings,
-    values,
-  })
-
-  protected html = uhtml
+  protected html = h;
+  protected h = h;
 
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
   }
+
+  abstract render(): { strings: string[], values: any[] };
 
   update(template?: string[], values?: any[]){
     // if update is being called from the frame loop, we don't need to do anything
@@ -91,12 +112,14 @@ export default abstract class ImHtml extends HTMLElement {
       template = result.strings
       values = result.values
     }
-    console.log("Calling update")
     // @ts-ignore typescript is dumb
     render(this.shadowRoot!, uhtml(template, ...values))
   }
 
-  // declare lifecycle methods and events
+  /* LIFECYCLE METHODS ******************************************************
+
+  These are called when the component is mounted or unmounted.
+  */
   abstract mount?(): void;
   abstract unmount?(): void;
 
