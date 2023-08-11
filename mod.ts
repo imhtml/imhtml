@@ -102,9 +102,9 @@ export default abstract class ImHtml extends HTMLElement {
     this.attachShadow({ mode: "open" });
   }
 
-  abstract render(): { strings: string[], values: any[] };
+  abstract render(): { strings: TemplateStringsArray | string[] , values: any[] };
 
-  update(template?: string[], values?: any[]){
+  update(template?: TemplateStringsArray | string[], values?: any[]){
     // if update is being called from the frame loop, we don't need to do anything
     // or else we will call render() to get the template and values
     if(!template || !values){
@@ -120,8 +120,8 @@ export default abstract class ImHtml extends HTMLElement {
 
   These are called when the component is mounted or unmounted.
   */
-  abstract mount?(): void;
-  abstract unmount?(): void;
+  mount?(): void;
+  unmount?(): void;
 
   #__mountCallbacks = new Set<() => void>();
   #__unmountCallbacks = new Set<() => void>();
