@@ -86,7 +86,15 @@ export const h = uhtml
 
 export default abstract class ImHtml extends HTMLElement {
   IMHTML_IS_VISIBLE = true;
-  IMHTML_PREV_VALUES: any[] = []
+  IMHTML_PREV_VALUES: any[] = [];
+
+  static tag = "im-html";
+
+  static use = (props?: Record<string, any> | null, children?: string) => {
+    if(!props) props = {};
+    const p = Object.keys(props).map((key) => `${key}="${props![key]}"`).join(" ");
+    return `<${ImHtml.tag} ${p}>${children}</${ImHtml.tag}>`
+  }
 
   // Intersection observer
   #__intersectionObserver: IntersectionObserver | null = null;
